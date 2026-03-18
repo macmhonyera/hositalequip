@@ -179,9 +179,9 @@ export default function EquipmentDetailPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { icon: <MapPin className="w-4 h-4" />, label: 'Location', value: `${equipment.hospital?.name ?? '—'} / ${equipment.department?.name ?? '—'}` },
-          { icon: <Calendar className="w-4 h-4" />, label: 'Next Service', value: formatDate(equipment.nextMaintenanceDate) },
+          { icon: <Calendar className="w-4 h-4" />, label: 'Next Service', value: formatDate(equipment.nextServiceDate) },
           { icon: <DollarSign className="w-4 h-4" />, label: 'Purchase Cost', value: formatCurrency(equipment.purchaseCost) },
-          { icon: <User className="w-4 h-4" />, label: 'Technician', value: equipment.assignedTechnician ? `${equipment.assignedTechnician.firstName} ${equipment.assignedTechnician.lastName}` : '—' },
+          { icon: <User className="w-4 h-4" />, label: 'Supplier', value: equipment.supplierName ?? '—' },
         ].map((item) => (
           <div key={item.label} className="bg-white rounded-xl border border-slate-200 p-4 flex items-start gap-3">
             <div className="p-1.5 rounded-lg bg-slate-100 text-slate-500 shrink-0">{item.icon}</div>
@@ -245,11 +245,11 @@ export default function EquipmentDetailPage() {
             </CardHeader>
             <CardBody className="space-y-3">
               {[
-                { label: 'Purchase Date', value: formatDate(equipment.purchaseDate) },
+                { label: 'Commissioned', value: formatDate(equipment.dateOfCommission) },
                 { label: 'Purchase Cost', value: formatCurrency(equipment.purchaseCost) },
-                { label: 'Warranty Expiry', value: formatDate(equipment.warrantyExpiry) },
-                { label: 'Last Service', value: formatDate(equipment.lastMaintenanceDate) },
-                { label: 'Next Service', value: formatDate(equipment.nextMaintenanceDate) },
+                { label: 'Warranty Expiry', value: formatDate(equipment.warrantyExpiryDate) },
+                { label: 'Last Service', value: formatDate(equipment.lastServiceDate) },
+                { label: 'Next Service', value: formatDate(equipment.nextServiceDate) },
                 { label: 'Hospital', value: equipment.hospital?.name },
                 { label: 'Department', value: equipment.department?.name },
               ].map(({ label, value }) => (
@@ -260,11 +260,11 @@ export default function EquipmentDetailPage() {
               ))}
             </CardBody>
           </Card>
-          {equipment.description && (
+          {equipment.notes && (
             <Card className="md:col-span-2">
-              <CardHeader><h3 className="text-sm font-semibold text-slate-900">Description</h3></CardHeader>
+              <CardHeader><h3 className="text-sm font-semibold text-slate-900">Notes</h3></CardHeader>
               <CardBody>
-                <p className="text-sm text-slate-600 leading-relaxed">{equipment.description}</p>
+                <p className="text-sm text-slate-600 leading-relaxed">{equipment.notes}</p>
               </CardBody>
             </Card>
           )}
@@ -284,11 +284,11 @@ export default function EquipmentDetailPage() {
                     <p className="text-xs text-slate-400 mt-0.5">
                       Scheduled: {formatDate(m.scheduledDate)} · Technician: {m.technician ? `${m.technician.firstName} ${m.technician.lastName}` : '—'}
                     </p>
-                    {m.notes && <p className="text-xs text-slate-500 mt-1">{m.notes}</p>}
+                    {m.findings && <p className="text-xs text-slate-500 mt-1">{m.findings}</p>}
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    {m.cost != null && (
-                      <span className="text-sm font-medium text-slate-700">{formatCurrency(m.cost)}</span>
+                    {m.totalCost != null && (
+                      <span className="text-sm font-medium text-slate-700">{formatCurrency(m.totalCost)}</span>
                     )}
                     <MaintenanceStatusBadge status={m.status} />
                   </div>
@@ -308,9 +308,9 @@ export default function EquipmentDetailPage() {
               {breakdowns.data.map((b) => (
                 <div key={b.id} className="px-6 py-4 flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <p className="text-sm text-slate-700 leading-snug">{b.description}</p>
+                    <p className="text-sm text-slate-700 leading-snug">{b.issueDescription}</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Reported: {formatRelative(b.reportedAt)}
+                      Reported: {formatRelative(b.dateReported)}
                       {b.assignedTechnician && ` · Assigned: ${b.assignedTechnician.firstName} ${b.assignedTechnician.lastName}`}
                     </p>
                   </div>

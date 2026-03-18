@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SeederModule } from './database/seeder.module';
@@ -20,19 +20,32 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 5432),
-        username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'password'),
-        database: configService.get('DB_NAME', 'hospital_equip'),
-        autoLoadEntities: true,
-        synchronize: configService.get('DB_SYNCHRONIZE', 'true') === 'true',
-        logging: configService.get('DB_LOGGING', 'false') === 'true',
-        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      }),
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        const isProduction = configService.get('NODE_ENV') === 'production';
+
+        const baseConfig = {
+          type: 'postgres' as const,
+          autoLoadEntities: true,
+          synchronize: configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
+          logging: configService.get<string>('DB_LOGGING', 'false') === 'true',
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          ssl: isProduction ? { rejectUnauthorized: false } : false,
+        };
+
+        if (databaseUrl) {
+          return { ...baseConfig, url: databaseUrl };
+        }
+
+        return {
+          ...baseConfig,
+          host: configService.get<string>('DB_HOST', 'localhost'),
+          port: configService.get<number>('DB_PORT', 5432),
+          username: configService.get<string>('DB_USERNAME', 'postgres'),
+          password: configService.get<string>('DB_PASSWORD', 'password'),
+          database: configService.get<string>('DB_NAME', 'hospital_equip'),
+        };
+      },
       inject: [ConfigService],
     }),
     SeederModule,
