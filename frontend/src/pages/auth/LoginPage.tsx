@@ -156,8 +156,8 @@ export default function LoginPage() {
             <div className="space-y-2">
               {[
                 { role: 'Admin', email: 'admin@hospital.com', password: 'Admin@123456', color: 'text-indigo-300' },
-                { role: 'Technician', email: 'farai.chikwanda@hospital.com', password: 'Tech@123456', color: 'text-emerald-300' },
-                { role: 'Guest', email: 'guest@hospital.com', password: 'Guest@123456', color: 'text-amber-300' },
+                { role: 'Technician', email: 'kudakwashe.mwangi@hospital.com', password: 'Admin@123456', color: 'text-emerald-300' },
+                { role: 'Guest', email: 'guest@hospital.com', password: 'Admin@123456', color: 'text-amber-300' },
               ].map(({ role, email, password, color }) => (
                 <div key={role} className="text-xs border-t border-white/10 pt-2 first:border-0 first:pt-0">
                   <span className={`font-semibold ${color}`}>{role}</span>
